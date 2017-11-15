@@ -19,9 +19,9 @@ public class MyShoppingList extends AbstractVerticle {
     WebClient shopping, pricer;
     private CircuitBreaker circuit;
 
+
     @Override
     public void start() {
-
         circuit = CircuitBreaker.create("circuit-breaker", vertx,
             new CircuitBreakerOptions()
                 .setFallbackOnFailure(true)
@@ -36,24 +36,25 @@ public class MyShoppingList extends AbstractVerticle {
 
         ServiceDiscovery.create(vertx, discovery -> {
             // Get pricer-service
-            Single<WebClient> s1 =
-                HttpEndpoint.rxGetWebClient(discovery,
-                    svc -> svc.getName().equals("pricer-service"));
+            Single<WebClient> s1 = HttpEndpoint
+                .rxGetWebClient(discovery, svc -> svc.getName().equals("pricer-service"));
 
             // Get shopping-backend
-            Single<WebClient> s2 =
-                HttpEndpoint.rxGetWebClient(discovery,
-                    svc -> svc.getName().equals("shopping-backend"));
+            Single<WebClient> s2 = HttpEndpoint
+                .rxGetWebClient(discovery, svc -> svc.getName().equals("shopping-backend"));
+
+            // When both services have been retrieved
 
             Single.zip(s1, s2, (p, s) -> {
-                pricer = p;
                 shopping = s;
+                pricer = p;
                 return vertx.createHttpServer()
                     .requestHandler(router::accept)
                     .listen(8080);
             }).subscribe();
-
         });
+
+
     }
 
     private void getShoppingList(RoutingContext rc) {
@@ -99,10 +100,10 @@ public class MyShoppingList extends AbstractVerticle {
                 .flatMapSingle(entry ->
                     circuit.<JsonObject>rxExecuteCommandWithFallback(
                         future -> Shopping.retrievePrice(pricer, entry, future),
-                        err -> Shopping.getFallbackPrice(entry)
+                        error -> Shopping.getFallbackPrice(entry)
                     ))
                 .subscribe(
-                    res -> Shopping.writeProductLine(serverResponse, res),
+                    product -> Shopping.writeProductLine(serverResponse, product),
                     rc::fail,
                     serverResponse::end
                 );

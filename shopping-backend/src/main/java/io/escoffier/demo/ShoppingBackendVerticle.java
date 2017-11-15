@@ -15,18 +15,18 @@ import java.util.Map;
 
 public class ShoppingBackendVerticle extends AbstractVerticle {
 
-    private RedisClient redis;
-
-    private static final String KEY = "SHOPPING";
+    RedisClient redis;
+    static String KEY = "SHOPPING";
 
     @Override
     public void start() {
+
         Router router = Router.router(vertx);
-        router.get("/").handler(rc -> rc.response().end("Hello Austin"));
+        router.get("/").handler(rc -> rc.response().end("hello "));
         router.get("/shopping").handler(this::getList);
         router.post().handler(BodyHandler.create());
         router.post("/shopping").handler(this::addToList);
-        router.delete("/shopping/:name").handler(this::deleteFromList);
+        router.delete("/shopping/:name").handler(this::removeFromList);
 
         ServiceDiscovery.create(vertx, discovery -> {
             RedisDataSource.getRedisClient(discovery, svc -> svc.getName().equals("redis"), ar -> {
@@ -41,9 +41,10 @@ public class ShoppingBackendVerticle extends AbstractVerticle {
             });
         });
 
+
     }
 
-    private void deleteFromList(RoutingContext rc) {
+    private void removeFromList(RoutingContext rc) {
         String name = rc.pathParam("name");
         redis.hdel(KEY, name, x -> {
             getList(rc);
@@ -54,23 +55,24 @@ public class ShoppingBackendVerticle extends AbstractVerticle {
         JsonObject json = rc.getBodyAsJson();
         String name = json.getString("name");
         Integer quantity = json.getInteger("quantity", 1);
-
         redis.hset(KEY, name, quantity.toString(), x -> {
             getList(rc);
         });
     }
 
     private void getList(RoutingContext rc) {
-        redis.hgetall(KEY, res -> {
-            if (res.failed()) {
-                rc.fail(res.cause());
+        redis.hgetall(KEY, ar -> {
+            if (ar.failed()) {
+                rc.fail(ar.cause());
             } else {
-                JsonObject json = res.result();
+                JsonObject result = ar.result();
                 rc.response()
                     .putHeader("X-POD", System.getenv("HOSTNAME"))
-                    .end(json.encodePrettily());
+                    .end(result.encodePrettily());
             }
         });
     }
+
+
 
 }

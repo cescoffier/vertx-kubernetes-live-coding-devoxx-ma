@@ -1,6 +1,6 @@
 # Slideless reactive microservices
 
-Code developed on stage during the "slideless reactive microservices" session presented at the Reactive Summit 2017.
+Code developed on stage during the "slideless reactive microservices" session presented at  Devoxx Maroc.
 
 ## Prerequisites
 

@@ -12,11 +12,12 @@
 11. Ok enough talking, let's see some code.
 12. Let's start with a first microservices - the shopping backend microservice.
 
-mvn io.fabric8:vertx-maven-plugin:1.0.9:setup \
+mvn io.fabric8:vertx-maven-plugin:1.0.13:setup \
  -Ddependencies=redis,web,service-discovery,service-discovery-kubernetes,org.slf4j:slf4j-api:1.7.25 \
  -Dverticle=io.escoffier.demo.ShoppingBackendVerticle \
  -DprojectGroupId=escoffier.me.demo \
- -DprojectArtifactId=shopping-backend 
+ -DprojectArtifactId=shopping-backend \
+ -DvertxVersion=3.5.0
 
 
 

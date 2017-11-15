@@ -5,7 +5,7 @@ NC='\033[0m' # No Color
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 
-PROJECT=reactive-summit
+PROJECT=devoxx-ma
 
 echo -e "${BLUE}Creating project ${PROJECT} ${NC}"
 oc new-project ${PROJECT} 
